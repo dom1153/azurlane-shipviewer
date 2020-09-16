@@ -1,0 +1,95 @@
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
+
+/* base classes */
+.level-text {
+  font-family: 'BenchNine', sans-serif;
+}
+.name-text {
+  font-family: 'Sarabun', sans-serif;
+}
+
+.shipyard-bg {
+  /* background-image: url('images/jill_einzbern.png'); */
+  background-blend-mode: darken;
+  background-attachment: fixed;
+  background-size: 100% 100%;
+  background-color: blue;
+}
+
+/* tailwind extensions */
+.ship-color-ultra {
+  @apply bg-pink-500 border-gray-700 bg-gradient-to-r from-yellow-400 to-purple-400
+}
+
+.ship-color-ultra-2 {
+  @apply bg-pink-500 border-gray-700 bg-gradient-to-r from-purple-400 to-green-400
+}
+
+.ship-portrait-bg-ultra {
+  @apply bg-gradient-to-br from-yellow-400 via-purple-400 to-green-400
+}
+
+.ship-color-ssr {
+  @apply bg-yellow-500 border-yellow-500
+}
+
+.ship-portrait-bg-ssr {
+  @apply bg-gradient-to-b from-yellow-800 to-yellow-300
+}
+
+.ship-color-elite {
+  @apply bg-purple-500 border-purple-500
+}
+
+.ship-portrait-bg-elite {
+  @apply bg-gradient-to-b from-purple-800 to-purple-300
+}
+
+.ship-color-rare {
+  @apply bg-blue-500 border-blue-500
+}
+
+.ship-portrait-bg-rare {
+  @apply bg-gradient-to-b from-blue-800 to-blue-300
+}
+
+.ship-color-common {
+  @apply bg-gray-500 border-gray-500
+}
+
+.ship-portrait-bg-common {
+  @apply bg-gradient-to-b from-gray-800 to-gray-300
+}
+
+@-webkit-keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/*--keyframe pointer --*/
+.fadeIn { 
+  -webkit-animation-name: fadeIn;
+  animation-name: fadeIn;
+  -webkit-animation-duration: .5s;
+  animation-duration: .5s;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+}
