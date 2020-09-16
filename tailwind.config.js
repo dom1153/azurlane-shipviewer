@@ -6,7 +6,13 @@ module.exports = {
     './src/**/*.jsx',
   ],
   theme: {
+    inset: {
+      '0': 0,
+      auto: 'auto',
+      '1/2': '50%',
+    },
   },
-  variants: {},
+  variants: {
+  },
   plugins: [],
 }

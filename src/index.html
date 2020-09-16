@@ -14,44 +14,101 @@
   </style>
 </head>
 
-<body class="bg-gradient-to-b from-gray-900 to-gray-800 bg-fixed name-text">
-  <div class="bg-black sticky text-white top-0 border-gray-700 border-b-2 h-12 z-50">
-    <div class="flex">
-      <button class="absolute top-0 h-16 w-16 mx-4 my-4 border-2 border-blue-600 bg-gray-900 text-white transform rotate-45 flex justify-center items-center">
-        <svg class="transform text-white fill-current h-12 -rotate-45" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><polygon points="3.828 9 9.899 2.929 8.485 1.515 0 10 .707 10.707 8.485 18.485 9.899 17.071 3.828 11 20 11 20 9 3.828 9"/></svg>
-      </button>
-      <div class="absolute transform top-0 -translate-y-4 ml-16 rotate-45 bg-gray-900 border-blue-600 border-2 h-8 w-8"></div>
-      <div class="flex flex-grow mt-1 items-center h-10 flex-no-wrap whitespace-no-wrap pl-24">
-        <div class="transform -mr-3 rotate-45 bg-gray-900 border-blue-600 border-b-2 h-6 w-6 z-0"></div>
-        <p class="text-2xl name-text pb-1 pt-1 leading-none w-48 mr-2 bg-gray-900 border-b-2 border-blue-600 z-10">Dock</p>
-        <p class="text-lg pb-1 name-text">Dock capaciy:</p>
-        <p class="ml-1 level-text text-xl">200<span class="italic">/</span>  200</p>
-        <div class="flex flex-grow justify-end content-center pr-16 pl-2">
-          <button class="bg-blue-800 border border-b-2 px-2 pb-2 h-8 align-middle text-lg name-text mr-2 w-32">Favorite <i class="fas fa-heart"></i></button>
-          <button class="bg-blue-800 border border-b-2 px-2 pb-2 h-8 align-middle text-lg name-text w-32">Stats <span class="ml-1 tracking-widest level-text text-xl">OFF</span></button>
-          <div class="w-10"></div>
-          <div>
-            <div class="inline-flex leading-none h-8 w-20 border-t border-l border-b border-white border-opacity-25">
-              <div class="bg-gray-900 w-24 border border-b-2 border-blue-900 border-opacity-50 ml-1 mb-1 mt-1 pl-2 leading-tight">
-                <i class="fas fa-sort"></i> Lv.
-              </div>
-            </div><button class="relative border bg-blue-800 leading-none border-b-2 px-2 h-8">
-              <p class="transform absolute top-0 scale-50 left-0 text-xs leading-none uppercase tracking-widest">filter</p>
-              Sort <i class="fas fa-sort-amount-up-alt"></i>
-            </button>
-          </div>
+<body class="bg-gradient-to-b from-gray-900 to-gray-800 bg-fixed name-font text-white">
+  <!-- modal -->
+  <div id="modal" class="fixed hidden flex content-center justify-center text-white z-50 h-full w-full left-auto overflow-auto bg-black bg-opacity-75 flex-col">
+    <div class="bg-white bg-opacity-75 border mx-auto shadow-lg w-4/5 text-black pr-4 pt-4 pb-4">
+      <!-- todo: generate rows with js instead (namely factions) -->
+      <div class="flex">
+        <div class="default-button flex-none -ml-2">Index</div>
+        <div class="bg-gray-800 p-2 opacity-75 flex-grow">
+          <button class="default-button">All</button>
+          <button class="default-button">Vanguard</button>
+          <button class="default-button">Main</button>
+          <button class="default-button">DD</button>
+          <button class="default-button">CL</button>
+          <button class="default-button">CA</button>
+          <button class="default-button">BB</button>
+          <button class="default-button">CV</button>
+          <button class="default-button">Repair</button>
+          <button class="default-button">SS</button>
+          <button class="default-button">Other</button>
         </div>
-        <button class="absolute top-0 right-0 h-10 w-10 mx-2 my-2 border border-b-2 border-r-2 border-white bg-gray-900 text-white transform rotate-45 flex justify-center items-center">
-          <i class="transform -rotate-45 fas fa-home text-2xl"></i>
-        </button>
+      </div>
+      <div class="flex">
+        <div class="default-button flex-none -ml-2">Faction</div>
+        <div class="bg-gray-800 p-2 opacity-75 flex-grow">
+          <button class="default-button">All factions</button>
+          <button class="default-button">Eagle Union</button>
+          <button class="default-button">Royal Navy</button>
+          <button class="default-button">Sakura Empire</button>
+          <button class="default-button">Iron Blood</button>
+          <button class="default-button">Dragon Empry</button>
+          <button class="default-button">Sardegna Empire</button>
+          <button class="default-button">Northern Parliament</button>
+          <button class="default-button">Iris Libre</button>
+          <button class="default-button">Vichya Dominion</button>
+          <button class="default-button">Other</button>
+        </div>
+      </div>
+      <div class="flex">
+        <div class="default-button flex-none -ml-2">Rarity</div>
+        <div class="bg-gray-800 p-2 opacity-75 flex-grow">
+          <button class="default-button">All</button>
+          <button class="default-button">Common</button>
+          <button class="default-button">Rare</button>
+          <button class="default-button">Elite</button>
+          <button class="default-button">Super Rare</button>
+          <button class="default-button">Ultra</button>
+        </div>
       </div>
     </div>
+    <div class="flex justify-center mt-10">
+      <button id="cancel-button" class="default-button">Cancel</button>
+      <button id="confirm-button" class="default-button">Confirm</button>
+    </div>
   </div>
-  
-  <div class="mx-auto w-full pl-16 py-5">
-    <div class="absolute transform -rotate-90 origin-bottom-left translate-y-48 -translate-x-1 uppercase text-white text-opacity-25 text-sm tracking-widest leading-none name-text">dockyard<div class="inline-block h-2 w-2 bg-white align-top mt-1 ml-1 bg-opacity-50"></div></div>
-      <div id="shipcollection" class="relative flex flex-wrap border-l border-white border-opacity-50 text-white mr-4">
+
+  <!-- wrap content in div for easy blurring with modal -->
+  <div id="content" class="overflow-hidden">
+    <div class="bg-black sticky text-white top-0 border-gray-700 border-b-2 h-12 z-40">
+      <div class="flex">
+        <button class="absolute top-0 h-16 w-16 mx-4 my-4 border-2 border-blue-600 bg-gray-900 text-white transform rotate-45 flex justify-center items-center">
+          <svg class="transform text-white fill-current h-12 -rotate-45" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><polygon points="3.828 9 9.899 2.929 8.485 1.515 0 10 .707 10.707 8.485 18.485 9.899 17.071 3.828 11 20 11 20 9 3.828 9"/></svg>
+        </button>
+        <div class="absolute transform top-0 -translate-y-4 ml-16 rotate-45 bg-gray-900 border-blue-600 border-2 h-8 w-8"></div>
+        <div class="flex flex-grow mt-1 items-center h-10 flex-no-wrap whitespace-no-wrap pl-24">
+          <div class="transform -mr-3 rotate-45 bg-gray-900 border-blue-600 border-b-2 h-6 w-6 z-0"></div>
+          <p class="text-2xl name-font pb-1 pt-1 leading-none w-48 mr-2 bg-gray-900 border-b-2 border-blue-600 z-10">Dock</p>
+          <p class="text-lg pb-1 name-font">Dock capaciy:</p>
+          <p class="ml-1 level-font text-xl">200<span class="italic">/</span>  200</p>
+          <div class="flex flex-grow justify-end content-center pr-16 pl-2">
+            <button class="default-button mr-2">Favorite <i class="fas fa-heart"></i></button>
+            <button class="default-button">Stats <span class="ml-1 tracking-widest level-font text-xl">OFF</span></button>
+            <div class="w-10"></div>
+            <div>
+              <div class="inline-flex leading-none h-8 w-20 border-t border-l border-b border-white border-opacity-25">
+                <div class="bg-gray-900 w-24 border border-b-2 border-blue-900 border-opacity-50 ml-1 mb-1 mt-1 pl-2 leading-tight">
+                  <i class="fas fa-sort"></i> Lv.
+                </div>
+              </div><button id="sort-button" class="relative border bg-blue-800 leading-none border-b-2 px-2 h-8">
+                <p class="transform absolute top-0 scale-50 left-0 text-xs leading-none uppercase tracking-widest">filter</p>
+                Sort <i class="fas fa-sort-amount-up-alt"></i>
+              </button>
+            </div>
+          </div>
+          <button class="absolute top-0 right-0 h-10 w-10 mx-2 my-2 border border-b-2 border-r-2 border-white bg-gray-900 text-white transform rotate-45 lg:flex justify-center items-center hidden">
+            <i class="transform -rotate-45 fas fa-home text-2xl"></i>
+          </button>
+        </div>
       </div>
+    </div>
+    
+    <div class="mx-auto w-full pl-16 py-5">
+      <div class="absolute transform -rotate-90 origin-bottom-left translate-y-48 -translate-x-1 uppercase text-white text-opacity-25 text-sm tracking-widest leading-none name-font">dockyard<div class="inline-block h-2 w-2 bg-white align-top mt-1 ml-1 bg-opacity-50"></div></div>
+      <div id="shipcollection" class="relative flex flex-wrap border-l border-white border-opacity-50 text-white mr-4 w-full">
+      </div>
+    </div>
   </div>
   <script src="index.js"></script>
 </body>

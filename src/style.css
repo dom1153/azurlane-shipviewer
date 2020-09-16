@@ -5,11 +5,16 @@
 @tailwind utilities;
 
 /* base classes */
-.level-text {
+.level-font {
   font-family: 'BenchNine', sans-serif;
 }
-.name-text {
+.name-font {
   font-family: 'Sarabun', sans-serif;
+}
+
+/* need ui button for top bar, normal button, and cancel/confirm style-ing */
+.default-button {
+  @apply bg-blue-800 border border-b-2 px-2 pb-2 h-8 align-middle text-lg name-font w-32 mr-1 mb-1 text-white truncate;
 }
 
 .shipyard-bg {

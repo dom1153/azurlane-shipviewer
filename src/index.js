@@ -1,13 +1,12 @@
-console.log("hello world!");
+if (IS_DEBUG()) console.log("starting index.js!");
+// use 'debugger' to create breakpoints
 
 // parcel specific import
 import { ShipPortraits, ShipTypeIcons } from "./imagelist.js"
 // azur lane api ships as a local json
 import ships from "./ships.json"
 
-// console.log(ships[0]);
-// console.log(ShipPortraits.values());
-const ShipPortraitList = [];
+const ShipPortraitMap = {};
 const ShipTypeIconMap = {
   Destroyer: ShipTypeIcons.DDicon,
   Light_Cruiser: ShipTypeIcons.CLicon,
@@ -30,7 +29,12 @@ const ShipTypeIconMap = {
   Akatsuki_subclass: ShipTypeIcons.DDicon,
   Submarine: ShipTypeIcons.SSicon,
   Submarine_Carrier: ShipTypeIcons.SSVicon,
-  Large_Cruiser: ShipTypeIcons.CBicon
+  Large_Cruiser: ShipTypeIcons.CBicon,
+}
+
+function IS_DEBUG()
+{
+  return process.env.NODE_ENV === "development"
 }
 
 function DoSanityCheck()
@@ -44,64 +48,61 @@ function DoSanityCheck()
   }
 }
 
-function IS_DEBUG()
+// parcel packages the filenames for us, lets get the ship name. also adds a _ to allow any name
+function getShipMapKeyFromFileName(filename)
 {
-  return process.env.NODE_ENV === "development"
+  return "_" + filename.match(/-(.*)Shipyard/)[1]
 }
 
+// get unicode translated name. _ is prepended to allow names like '22'
+function getShipMapKeyFromShipData(ship)
+{
+  return "_" + decodeURIComponent(new URL(ship.wikiUrl).pathname).replace('/','');
+}
+
+// map ship data to ship portraits
+// also generate Ship Card id's
 function DoPreProcessing()
 {
-    // populate images into a list for pre-processing
+  // populate images into a map for fast indexing
   for (let s in ShipPortraits)
   {
     let value = ShipPortraits[s];
-    ShipPortraitList.push(value);
+    let key = getShipMapKeyFromFileName(value);
+    ShipPortraitMap[key] = value;
   }
 
-  // console.log(ShipPortraitList);
-  // for (let i of ShipPortraitList)
+  // console.log(ShipPortraitMap);
+  // for (let i in ShipPortraitMap)
   // {
-  //   console.log(`i: ${i}, uname: ${getUNameFromFileName(i)}`);
+  //   console.log(`k: ${ShipPortraitMap[i]}, i: ${i}`);
   // }
 
-  // add ship images to ship json (runtime)
+  // add ship images to ship json (this is necessary as parcel generates filenames)
+  // In the future the mapping may be done in a seperate (js?) script... to remove small overhead?
+  
+  // probably can't sort as is due to collab / pr ships... need to filter first
+  // let copy =  ships.slice();
+  // copy.sort((a, b) => { return a.id - b.id });
+  // console.log(copy)
+
   for (let s of ships)
   {
-    let wikiName = getUNameFromShip(s);
-    // todo: this is SUPER slow
-    let fname = ShipPortraitList.find(ele => getUNameFromFileName(ele) === wikiName);
+    let key = getShipMapKeyFromShipData(s);
+    let fname = ShipPortraitMap[key];
     if (fname)
     {
-      s['shipCardImg'] = fname
-      generateShipCard(s);
+      s['shipCardImg'] = fname;
+      generateShipCard(s, true);
     }
     else if (IS_DEBUG())
     {
-      throw new Error(`Could not find match for ${wikiName} (${fname})`);
-    }
-    // console.log(`WikiName: ${wikiName}, fname: ${fname}`);
-
-    // get unicode translated name
-    function getUNameFromShip(ship) {
-      return decodeURIComponent(new URL(ship.wikiUrl).pathname).replace('/','');
-    }
-    // parcel packages the filenames for us, lets get the ship name
-    function getUNameFromFileName(filename) {
-      return filename.match(/-(.*)Shipyard/)[1];
+      throw new Error(`Could not find match for ${key} (${fname})`);
     }
   }
 }
 
-// Light Cruiser
-//  "Destroyer" &&
-//  "Heavy Cruiser" &&
-//  "Battleship" &&
-//  "Repair Ship" &&
-//  "Battlecruiser" &&
-//  "Submarine Carrier" &&
-// Aircraft Carrier")
-
-function generateShipCard(ship)
+function generateShipCard(ship, archiveStyle=false)
 {
   // pick class color color based on rariry
   let topborder;
@@ -138,39 +139,40 @@ function generateShipCard(ship)
     botborder = topborder;
     bg = "ship-portrait-bg-common"
   }
-  else if (IS_DEBUG) {
+  else if (IS_DEBUG()) {
     throw new Error(`Unknown rarity found: ${rarity}, ${ship.names.en}`);
   }
 
-  // build tag
+  // assemble tag contents
   const portrait = ship.shipCardImg;
   const typeIcon = getClassTypeIcon(ship);
-  // const cashTag = $(`<div id="container" class="border border-black rounded-md border-opacity-75 ml-4 mb-4"><div id="top-border" class="rounded-t-md h-2 ${topborder}"></div><div class="flex"><div class="relative border-l border-r ${topborder}" id='portrait-container'><div class="absolute top-0 bg-black bg-opacity-50 w-full"><img class="h-full select-none inline-block absolute top-0 left-0" src="${typeIcon}"><div class="text-white text-2xl font-semibold text-right leading-none pr-2 select-none level-text tracking-wider">Lv.100</div></div><img class="border-l-4 border-r-4 border-opacity-75 border-black ${bg}" width="144" height="192" src="${portrait}"><div class="absolute bottom-0 bg-black bg-opacity-75 text-white text-md tracking-wide align-bottom w-full text-center leading-none mb-3 pb-1 select-none name-text truncate px-2">${ship.names.en}</div></div></div><div id="bottom-border" class="relative rounded-b-md h-2 border ${botborder}"><div class="flex align-centers justify-center"><div id="star-container" class="absolute bottom-0 leading-none"></div></div></div></div>`);
-  const cashTag = $(`<div id="container" class="border border-black rounded-md border-opacity-75 ml-4 mb-4">
+  const cashTag = $(
+  `<div id="container" class="border border-black rounded-md border-opacity-75 ml-4 mb-4">
     <div id="top-border" class="rounded-t-md h-2 ${topborder}"></div>
-    <div class="flex">
-      <div class="relative border-l border-r ${topborder}" id='portrait-container'>
-        <div class="absolute top-0 bg-black bg-opacity-50 w-full">
-          <img class="h-full select-none inline-block absolute top-0 left-0" src="${typeIcon}">
-          <div class="text-white text-2xl font-semibold text-right leading-none pr-2 select-none level-text tracking-wider">Lv.100</div>
-        </div>
-        <img class="border-l-4 border-r-4 border-opacity-75 border-black ${bg}" style="width: 144px; height: 192px;" src="${portrait}">
-        <div class="absolute bottom-0 bg-black bg-opacity-75 text-white text-md tracking-wide align-bottom w-full text-center leading-none mb-3 pb-1 select-none name-text truncate px-2">${ship.names.en}</div>
+    <div id="portrait-container" class="relative flex border-l border-r ${topborder}">
+      <div class="absolute top-0 bg-black bg-opacity-50 w-full">
+        <img loading="lazy" class="inline-block absolute top-0 left-0 h-full select-none" src="${typeIcon}">
+        <div id="level-label" class="text-white text-xl font-semibold text-right leading-none select-none level-font tracking-wider h-5 pr-2">Lv.100</div>
       </div>
+      <img loading="lazy" class="border-l-4 border-r-4 border-opacity-75 border-black ${bg}" style="width: 144px; height: 192px;" src="${portrait}">
+      <div class="absolute bottom-0 bg-black bg-opacity-75 text-white text-md tracking-wide align-bottom w-full text-center leading-none select-none name-font truncate mb-3 pb-1 px-2">${ship.names.en}</div>
     </div>
-    <div id="bottom-border" class="relative rounded-b-md h-2 border ${botborder}">
-      <div class="flex align-centers justify-center">
-        <div id="star-container" class="absolute bottom-0 leading-none">
-        </div>
-      </div>
+    <div id="bottom-border" class="flex align-centers justify-center relative h-2 rounded-b-md border ${botborder}">
+      <div id="star-container" class="absolute bottom-0 leading-none"></div>
     </div>
   </div>`);
-  generateStarCnt(ship, cashTag);
+  
+  if (!archiveStyle)
+  {
+    generateStarCnt(ship, cashTag);
+  }
+  else
+  {
+    cashTag.find("#level-label").text("");
+  }
 
   // add to DOM
   $('#shipcollection')[0].append(cashTag[0]);
-
-  // throw new Error(`HALTING FOR DEBUG.`);
 
   function getClassTypeIcon(ship)
   {
@@ -197,52 +199,35 @@ function generateShipCard(ship)
       if (i == 0) cash.addClass('-ml-3');
       // console.log(shipTag)
       // console.log()
-      shipTag.find('#star-container')[0].append(cash[0]);
+      shipTag.find('#star-container')[0].append[0](cash[0]);
     }
+  }
+}
+
+function DoEventBinding()
+{
+  $("#sort-button").on('click', openModal);
+  $("#modal").find("#cancel-button").on('click', hideModal);
+  $("#modal").find("#confirm-button").on('click', hideModal);
+
+  function openModal(e)
+  {
+    $("#modal").removeClass("hidden");
+    $("#content").addClass("blur-10 overflow-hidden");
+  }
+  function hideModal(e)
+  {
+    $("#modal").addClass("hidden");
+    $("#content").removeClass("blur-10 overflow-hidden");
   }
 }
 
 function main()
 {
-  if (IS_DEBUG())
-  {
-    DoSanityCheck();
-  }
+  if (IS_DEBUG()) console.log('inside main');
+  if (IS_DEBUG()) DoSanityCheck();
   DoPreProcessing();
-  console.log('done pre processing');
+  DoEventBinding();
+  if (IS_DEBUG()) console.log('done pre processing');
 }
 main();
-
-// const _DEBUG = false;
-// if (_DEBUG)
-// {
-//   let i;
-//   for (i = 0; i < 199; i++)
-//   {
-//     let tag=`<div id="container" class="border border-black rounded-md border-opacity-75 ml-4 mb-4 fadeIn">
-//             <div id="top-border" class="rounded-t-md h-2 ship-color-elite"></div>
-//             <div class="flex">
-//               <div class="relative border-l border-r ship-color-elite" id='portrait-container'>
-//                 <div class="absolute top-0 bg-black bg-opacity-50 w-full">
-//                   <img class="h-full select-none inline-block absolute top-0 left-0" src="${clicon}">
-//                   <div class="text-white text-2xl font-semibold text-right leading-none pr-2 select-none level-text tracking-wider">Lv.100</div>
-//                 </div>
-//                 <img class="border-l-4 border-r-4 border-opacity-75 border-black ship-portrait-bg-elite" width="144" height="192" src="${ShipPortraits.bel}">
-//                 <div class="absolute bottom-0 bg-black bg-opacity-75 text-white text-md tracking-wide align-bottom w-full text-center leading-none mb-3 pb-1 select-none name-text truncate px-2">Little Bel</div>
-//               </div>
-//             </div>
-//             <div id="bottom-border" class="relative rounded-b-md h-2 border ship-color-elite">
-//               <div class="flex align-centers justify-center">
-//                 <div class="absolute bottom-0 leading-none">
-//                   <i class="relative fas fa-star text-yellow-300 stroke-2 -ml-3 -mr-3 text-md leading-none"><i class="absolute text-yellow-900 left-0 far fa-star"></i></i>
-//                   <i class="relative fas fa-star text-yellow-300 stroke-2 -mr-3 text-md"><i class="absolute text-yellow-900 left-0 far fa-star"></i></i>
-//                   <i class="relative fas fa-star text-yellow-300 stroke-2 -mr-3 text-md"><i class="absolute text-yellow-900 left-0 far fa-star"></i></i>
-//                   <i class="relative fas fa-star text-yellow-300 stroke-2 -mr-3 text-md"><i class="absolute text-yellow-900 left-0 far fa-star"></i></i>
-//                   <i class="relative fas fa-star text-yellow-300 stroke-2 -mr-3 text-md"><i class="absolute text-yellow-900 left-0 far fa-star"></i></i>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>`
-//     $('#shipcollection')[0].append($(tag)[0]);
-//   }
-// }
