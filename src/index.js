@@ -4,7 +4,7 @@ if (IS_DEBUG()) console.log("starting index.js!");
 // parcel specific import
 import { ShipPortraits, ShipTypeIcons } from "./imagelist.js"
 // azur lane api ships as a local json
-import ships from "./ships.json"
+import ShipsDBList from "./ships.json"
 
 const ShipPortraitMap = {};
 const ShipTypeIconMap = {
@@ -60,8 +60,61 @@ function getShipMapKeyFromShipData(ship)
   return "_" + decodeURIComponent(new URL(ship.wikiUrl).pathname).replace('/','');
 }
 
-// map ship data to ship portraits
-// also generate Ship Card id's
+// generate enum for each type of filter (standard, collab, pr, 
+function getStandardShips(ships)
+{
+  const reg = /^\d+$/;
+  let filtered = ships.filter((val) => { return reg.test(val.id); });
+
+  // sort by id number
+  filtered.sort((a, b) => a.id - b.id);
+  return filtered;
+}
+
+// TODO: don't worry about 3xxx id, just grab retrofit property
+// no good way to grab the kai ship info rn... but we mostly need images anyways
+function getRetrofitShips(ships)
+{
+}
+
+// Collab "Collab001"
+function getCollabShips(ships)
+{
+  const reg = /^Collab\d+$/;
+  let filtered = ships.filter((val) => reg.test(val.id) );
+  // sort by id
+  filtered.sort((a, b) => {
+    const reg = /\d+$/;
+    let nameA = a.id.match(reg);
+    let nameB = b.id.match(reg);
+    return nameA - nameB;
+  });
+  return filtered
+}
+
+function getResearchShips(ships)
+{
+  const reg = /^Plan\d+$/;
+  let filtered = ships.filter((val) => reg.test(val.id));
+  // sort by id number
+  // todo: generalize into it's own sort function
+  filtered.sort((a, b) => {
+    const reg = /\d+$/;
+    let nameA = a.id.match(reg);
+    let nameB = b.id.match(reg);
+    return nameA - nameB;
+  });
+  return filtered;
+}
+
+// rarity filter (one or many)
+// faction filter (one or many)
+// ship type filter (one or many)
+// extra filter (has skin, has retrofit, has wedding skin, has l2d skin)
+// todo: sort order (rarity, lv. total stats, stat [fp, avi, eva, aa, trp, reld, hp, asw])
+// todo 2: use toasts/popcorn to describe what each stat means! [desktop]
+
+// description: map ship data to ship portraits, also generate Ship Card id's
 function DoPreProcessing()
 {
   // populate images into a map for fast indexing
@@ -72,21 +125,14 @@ function DoPreProcessing()
     ShipPortraitMap[key] = value;
   }
 
-  // console.log(ShipPortraitMap);
   // for (let i in ShipPortraitMap)
   // {
-  //   console.log(`k: ${ShipPortraitMap[i]}, i: ${i}`);
+  //   if (IS_DEBUG()) console.log(`k: ${ShipPortraitMap[i]}, i: ${i}`);
   // }
 
   // add ship images to ship json (this is necessary as parcel generates filenames)
   // In the future the mapping may be done in a seperate (js?) script... to remove small overhead?
-  
-  // probably can't sort as is due to collab / pr ships... need to filter first
-  // let copy =  ships.slice();
-  // copy.sort((a, b) => { return a.id - b.id });
-  // console.log(copy)
-
-  for (let s of ships)
+  for (let s of getStandardShips(ShipsDBList))
   {
     let key = getShipMapKeyFromShipData(s);
     let fname = ShipPortraitMap[key];
@@ -154,7 +200,7 @@ function generateShipCard(ship, archiveStyle=false)
         <img loading="lazy" class="inline-block absolute top-0 left-0 h-full select-none" src="${typeIcon}">
         <div id="level-label" class="text-white text-xl font-semibold text-right leading-none select-none level-font tracking-wider h-5 pr-2">Lv.100</div>
       </div>
-      <img loading="lazy" class="border-l-4 border-r-4 border-opacity-75 border-black ${bg}" style="width: 144px; height: 192px;" src="${portrait}">
+      <img loading="lazy" class="border-l-4 border-r-4 border-opacity-75 border-black ${bg}" style="min-width: 144px; min-height: 192px;" src="${portrait}">
       <div class="absolute bottom-0 bg-black bg-opacity-75 text-white text-md tracking-wide align-bottom w-full text-center leading-none select-none name-font truncate mb-3 pb-1 px-2">${ship.names.en}</div>
     </div>
     <div id="bottom-border" class="flex align-centers justify-center relative h-2 rounded-b-md border ${botborder}">
